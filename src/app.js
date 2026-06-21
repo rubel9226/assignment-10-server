@@ -10,7 +10,7 @@ const { errorResponse } = require('./controllers/response.controllers');
 
 
 app.use(cors({
-    origin: ["https://ag11sportslive.vercel.app", "http://localhost:3000", "https://qcfb0t7q-3000.inc1.devtunnels.ms"],
+    origin: ["https://assignment-10-woad.vercel.app", "http://localhost:3000", clientUrl],
     credentials: true
 }));
 
