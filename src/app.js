@@ -27,6 +27,10 @@ app.use('/api/lessons', lessonRouter);
 
 
 
+app.use((req, res, next) => {
+    next(createError(404, 'route not found'));
+});
+
 app.use((err, req, res, next) => {
     return errorResponse(res, {
         statusCode: err.status,
