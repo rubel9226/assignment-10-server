@@ -5,6 +5,7 @@ const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 const isLoggedIn = async (req, res, next) => {
     try { 
         const token = req.headers.authorization; 
+        console.log(token);
 
         if(!token){
             throw createError(401, 'Unauthorize')

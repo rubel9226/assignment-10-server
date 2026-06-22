@@ -24,7 +24,14 @@ app.use(express.json());
 const lessonRouter = require('./routes/lesson.route');
 app.use('/api/lessons', lessonRouter);
 
+const commentRouter = require('./routes/comment.routes');
+app.use('/api/comments', commentRouter);
 
+const reportRouter = require('./routes/report.routes');
+app.use('/api/reports', reportRouter);
+
+const userRouter = require('./routes/user.routes');
+app.use('/api/users', userRouter);
 
 
 app.use((req, res, next) => {

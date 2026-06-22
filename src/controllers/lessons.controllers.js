@@ -156,6 +156,172 @@ const handleGetAllLessons = async (req, res, next) => {
 
 
 
+const handleGetSingleLessons = async (req, res, next) => {
+    try { 
+        const id = req.params.id;
+
+        const lesson = await Lesson.findOne({_id: id});
+
+
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson fetched successfully.",
+            payload: lesson,
+        });
+    } catch (error) {
+        console.log(error.message);
+        next(error);
+    }
+};
+
+
+
+
+const handleUpdateLesson = async (req, res, next) => {
+    try {
+      const { id } = req.params; 
+      const {
+          title,
+          description,
+          category,
+          emotionalTone,
+          visibility,
+          accessLevel,
+          image,
+      } = req.body;
+
+      
+
+      const lesson = await Lesson.findById(id);
+      console.log(lesson, req.body);
+
+      if (!lesson) {
+          throw createError(404, 'Lesson not found.');
+      }
+
+      // Owner check
+      if (lesson.creatorId.toString() !== req.user.id) {
+          throw createError(403, 'Unauthorized access.');
+      }
+
+      // Premium lesson protection
+      if ( accessLevel === "Premium" && !req.user.isPremium ) {
+          throw createError(403, 'Only premium users can create premium lessons')
+      }
+
+      const updatedLesson = await Lesson.findByIdAndUpdate(
+          {_id: id},
+          {
+              title,
+              description,
+              category,
+              emotionalTone,
+              visibility,
+              accessLevel,
+              image,
+          },
+          {
+              returnDocument: 'after',
+              runValidators: true,
+          }
+      ); 
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson updated successfully",
+            payload: updatedLesson,
+        });
+    } catch (error) {
+      next(error);
+    }
+};
+
+
+
+
+const handleDeleteLesson = async (req, res, next) => {
+    try {
+      const { id } = req.params; 
+
+      const lesson = await Lesson.findById(id); 
+
+      if (!lesson) {
+          throw createError(404, 'Lesson not found.');
+      }
+
+      // Owner check
+      if (lesson.creatorId.toString() !== req.user.id) {
+          throw createError(403, 'Unauthorized access.');
+      } 
+
+      const deletedLesson = await Lesson.findOneAndDelete(
+          {_id: id} 
+      ); 
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson updated successfully",
+            payload: deletedLesson,
+        });
+    } catch (error) {
+      next(error);
+    }
+};
+
+
+
+
+// get my lessons 
+const handleGetMyLessons = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+
+        console.log('get my lessons')
+
+        const lessons = await Lesson.find({
+          creatorId: userId,
+        }).sort({
+          createdAt: -1,
+        });
+
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson fetched successfully.",
+            payload: lessons,
+        });
+    } catch (error) { 
+      next(error);
+    }
+};
+
+
+
+
+// get my lessons 
+const handleGetRecentLessons = async (req, res, next) => {
+    try {
+        const userId = req.user.id; 
+
+        const lessons = await Lesson.find(
+            { creatorId: userId}
+        ).sort({ createdAt: -1}).limit(5);
+
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson fetched successfully.",
+            payload: lessons,
+        });
+    } catch (error) { 
+      next(error);
+    }
+};
+
+
+
+
 const handleLikeLessons = async (req, res, next) => {
   try {
     const { lessonId } = req.params;
@@ -201,6 +367,56 @@ const handleLikeLessons = async (req, res, next) => {
 
 
 
+const handleSaveLessons = async (req, res, next) => {
+  try {
+    const { lessonId } = req.params;
+    const user = req.user;
+
+    const lesson = await Lesson.findById(lessonId);
+
+    if (!lesson) {
+      throw createError(404, "Lesson not found");
+    }
+
+    const alreadySave = lesson.favorites.includes(user.id);
+
+    if (alreadySave) {
+      lesson.favorites = lesson.favorites.filter(
+        (id) => id.toString() !== user.id.toString()
+      );
+
+      lesson.favoritesCount = Math.max(0, lesson.favoritesCount - 1);
+    } else {
+      lesson.favorites.push(user.id);
+      lesson.favoritesCount += 1;
+    }
+
+    await lesson.save();
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: alreadySave
+        ? "Lesson unliked successfully."
+        : "Lesson liked successfully.",
+      payload: {
+        likesCount: lesson.favoritesCount,
+        isLiked: !alreadySave,
+      },
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+
+
+
+
+
+
+
+
 
 
 
@@ -210,5 +426,14 @@ const handleLikeLessons = async (req, res, next) => {
 module.exports = { 
     handleCreateLessons, 
     handleGetAllLessons,
-    handleLikeLessons
+    handleGetSingleLessons,
+    handleGetMyLessons,
+    handleGetRecentLessons,
+
+    handleLikeLessons, 
+    handleSaveLessons,
+
+
+    handleUpdateLesson, 
+    handleDeleteLesson
 }
