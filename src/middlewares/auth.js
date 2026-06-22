@@ -1,6 +1,7 @@
 const createError = require("http-errors"); 
 const { jwtAccessKey, clientUrl } = require("../secret");
 const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
+const { successResponse } = require("../controllers/response.controllers");
 
 const isLoggedIn = async (req, res, next) => {
     try { 
