@@ -15,16 +15,18 @@ const isLoggedIn = async (req, res, next) => {
             new URL(`${clientUrl}/api/auth/jwks`)
         );
 
-        const jwks = createRemoteJWKSet(
-            new URL(`${clientUrl}/api/auth/jwks`)
+        const response = await fetch(
+            `${clientUrl}/api/auth/jwks`
         );
+
+        const data = await response.json();
         const url = `${clientUrl}/api/auth/jwks`
-        const newUrl = {url, jwks}
+        const newUrl = {url, data}
 
         return successResponse(res, {
             statusCode: 200,
             message: JWKS || "Public lessons fetched successfully.",
-            payload: {JWKS:JWKS, url, newUrl, token},
+            payload: {JWKS:data, url, newUrl, token},
         });
 
         const { payload } = await jwtVerify(token, JWKS);
