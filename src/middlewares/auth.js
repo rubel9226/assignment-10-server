@@ -5,29 +5,15 @@ const { successResponse } = require("../controllers/response.controllers");
 
 const isLoggedIn = async (req, res, next) => {
     try { 
-        const token = req.headers.authorization; 
-        console.log(token);
+        const token = req.headers.authorization;
 
         if(!token){
             throw createError(401, 'Unauthorize')
         };
+
         const JWKS = createRemoteJWKSet(
             new URL(`${clientUrl}/api/auth/jwks`)
-        );
-
-        const response = await fetch(
-            `${clientUrl}/api/auth/jwks`
-        );
-
-        const data = await response.json();
-        const url = `${clientUrl}/api/auth/jwks`
-        const newUrl = {url, data}
-
-        return successResponse(res, {
-            statusCode: 200,
-            message: JWKS || "Public lessons fetched successfully.",
-            payload: {JWKS:data, url, newUrl, token},
-        });
+        ); 
 
         const { payload } = await jwtVerify(token, JWKS);
         
@@ -38,7 +24,6 @@ const isLoggedIn = async (req, res, next) => {
         req.user = payload;
         next();
     } catch (error) {
-        console.log(error.message);
         next(error)
     }
 }; 
