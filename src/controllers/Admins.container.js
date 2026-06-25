@@ -313,6 +313,35 @@ const handleGetLessonGrowth = async (req, res, next) => {
 };
 
 
+
+const handleFeaturedLessons = async (req, res, next) => {
+    try {
+        const {id} = req.params;
+        const lesson = await Lesson.findOne({_id: id});
+
+        if(!lesson){
+            throw createError(404, 'Lesson not found.');
+        } 
+        const update ={isReviewed: !lesson?.isReviewed};
+        console.log(update);
+
+        const UpdatedLesson = await Lesson.findOneAndUpdate(
+            {_id: id},
+            update,
+            {returnDocument: "after"}
+        )
+        
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson growth returned successfully",
+            payload: UpdatedLesson,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 module.exports = {
     handleGetUsers,
     handleCreateAdmin,
@@ -320,5 +349,8 @@ module.exports = {
     handleGetProfileStatsAdmins,
     handleGetTopContributors,
     handleGetUserGrowth,
-    handleGetLessonGrowth
+    handleGetLessonGrowth,
+
+
+    handleFeaturedLessons,
  }

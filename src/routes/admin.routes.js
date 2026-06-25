@@ -1,7 +1,7 @@
 const express = require("express");
 const { handleCreateReport } = require("../controllers/report.controllers");
 const { isLoggedIn, isAdmin } = require("../middlewares/auth");
-const { handleGetProfileStatsAdmins, handleGetTopContributors, handleGetUserGrowth, handleGetLessonGrowth, handleGetAdminsStats, handleGetUsers, handleCreateAdmin } = require("../controllers/Admins.container");
+const { handleGetProfileStatsAdmins, handleGetTopContributors, handleGetUserGrowth, handleGetLessonGrowth, handleGetAdminsStats, handleGetUsers, handleCreateAdmin, handleFeaturedLessons } = require("../controllers/Admins.container");
 
 
 const adminRouter = express.Router();
@@ -15,13 +15,6 @@ adminRouter.get(
     handleGetUsers
 ); 
 
-// post api/admins
-adminRouter.patch(
-    '/create-admin/:id', 
-    isLoggedIn,
-    isAdmin,
-    handleCreateAdmin
-); 
 
 
 // post api/admins
@@ -64,7 +57,28 @@ adminRouter.get(
     isLoggedIn,
     isAdmin,
     handleGetLessonGrowth
-); 
+);
+
+
+
+
+// post api/admins
+adminRouter.patch(
+    '/create-admin/:id', 
+    isLoggedIn,
+    isAdmin,
+    handleCreateAdmin
+);
+
+// post api/admins
+adminRouter.patch(
+    '/feature-lesson/:id',
+    isLoggedIn,
+    isAdmin,
+    handleFeaturedLessons
+);
+
+
 
 
 module.exports = adminRouter;

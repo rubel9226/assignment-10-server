@@ -307,6 +307,7 @@ const handleGetRecentLessons = async (req, res, next) => {
         const lessons = await Lesson.find(
             { creatorId: userId}
         ).sort({ createdAt: -1}).limit(5);
+        console.log(lessons, 'recent lessons');
 
 
         return successResponse(res, {
