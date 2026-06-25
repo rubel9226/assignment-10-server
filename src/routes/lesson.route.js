@@ -1,6 +1,6 @@
 const express = require('express'); 
 const { isLoggedIn } = require('../middlewares/auth');
-const { handleCreateLessons, handleGetAllLessons, handleLikeLessons, handleGetSingleLessons, handleSaveLessons, handleGetMyLessons, handleUpdateLesson, handleDeleteLesson, handleGetRecentLessons } = require('../controllers/lessons.controllers');
+const { handleCreateLessons, handleGetAllLessons, handleLikeLessons, handleGetSingleLessons, handleSaveLessons, handleGetMyLessons, handleUpdateLesson, handleDeleteLesson, handleGetRecentLessons, handleFeaturedLessons } = require('../controllers/lessons.controllers');
 const { upload } = require('../middlewares/upload');
 const lessonRouter = express();
 
@@ -74,6 +74,13 @@ lessonRouter.put(
     '/save-unsave/:lessonId', 
     isLoggedIn,
     handleSaveLessons
+);
+
+
+// put api/lessons/
+lessonRouter.get(
+    '/featured-lessons',
+    handleFeaturedLessons
 );
 
 

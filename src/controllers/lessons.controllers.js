@@ -1,3 +1,4 @@
+const createError = require("http-errors");
 const cloudinary = require("../config/cloudinary");
 const Lesson = require("../models/lesson.modal");
 const { successResponse } = require("./response.controllers");
@@ -149,6 +150,7 @@ const handleGetAllLessons = async (req, res, next) => {
         });
     } catch (error) {
         console.log(error.message);
+        console.log(error);
         next(error);
     }
 };
@@ -413,6 +415,27 @@ const handleSaveLessons = async (req, res, next) => {
 
 
 
+const handleFeaturedLessons = async (req, res, next) => {
+    try {
+        const lessons = await Lesson.find({isFeatured: true})
+        if(!lessons){
+            createError(404, 'Lessons not found!')
+        }
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson return successfully.",
+            payload: lessons,
+        });
+    } catch (error) {
+        console.log(error.message);
+        next(error);
+    }
+};
+
+
+
+
 
 
 
@@ -436,5 +459,6 @@ module.exports = {
 
 
     handleUpdateLesson, 
-    handleDeleteLesson
+    handleDeleteLesson,
+    handleFeaturedLessons
 }

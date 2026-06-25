@@ -1,10 +1,19 @@
 const express = require("express");
 const { handleCreateReport } = require("../controllers/report.controllers");
 const { isLoggedIn, isAdmin } = require("../middlewares/auth");
-const { handleGetProfileStatsAdmins, handleGetTopContributors, handleGetUserGrowth, handleGetLessonGrowth, handleGetAdminsStats, handleGetUsers, handleCreateAdmin, handleFeaturedLessons } = require("../controllers/Admins.container");
+const { handleGetProfileStatsAdmins, handleGetTopContributors, handleGetUserGrowth, handleGetLessonGrowth, handleGetAdminsStats, handleGetUsers, handleCreateAdmin, handleFeaturedLessons, handleReviewedLessons, handleGetAllLessonsAdmin, handleDeleteLessons, handleGetLessonsStats, handleGetReportsStats, handleGetReportsLessons, handleIgnoreLessons } = require("../controllers/Admins.container");
 
 
 const adminRouter = express.Router();
+
+
+// post api/admins
+adminRouter.get(
+    '/all-lessons', 
+    isLoggedIn,
+    isAdmin,
+    handleGetAllLessonsAdmin
+); 
 
 
 // post api/admins
@@ -32,6 +41,15 @@ adminRouter.get(
     isLoggedIn,
     isAdmin,
     handleGetProfileStatsAdmins
+); 
+
+
+// post api/admins
+adminRouter.get(
+    '/lessons-stats', 
+    isLoggedIn,
+    isAdmin,
+    handleGetLessonsStats
 ); 
 
 
@@ -70,6 +88,8 @@ adminRouter.patch(
     handleCreateAdmin
 );
 
+
+
 // post api/admins
 adminRouter.patch(
     '/feature-lesson/:id',
@@ -77,6 +97,51 @@ adminRouter.patch(
     isAdmin,
     handleFeaturedLessons
 );
+
+
+// post api/admins
+adminRouter.patch(
+    '/review-lesson/:id',
+    isLoggedIn,
+    isAdmin,
+    handleReviewedLessons
+);
+
+
+// post api/admins
+adminRouter.patch(
+    '/delete-lesson/:id',
+    isLoggedIn,
+    isAdmin,
+    handleDeleteLessons
+);
+
+
+// post api/admins
+adminRouter.patch(
+    '/ignore-lesson/:id',
+    // isLoggedIn,
+    // isAdmin,
+    handleIgnoreLessons
+);
+
+
+// post api/admins
+adminRouter.get(
+    '/reports-stats', 
+    isLoggedIn,
+    isAdmin,
+    handleGetReportsStats
+); 
+
+
+// post api/admins
+adminRouter.get(
+    '/reports-lessons', 
+    isLoggedIn,
+    isAdmin,
+    handleGetReportsLessons
+); 
 
 
 

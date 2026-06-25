@@ -6,6 +6,98 @@ const Report = require("../models/report.modal");
 
 
 
+
+const handleGetAllLessonsAdmin = async (req, res, next) => {
+    try {
+        const {
+            page = 1,
+            limit = 12,
+            search = "",
+            category,
+            emotionalTone,
+            accessLevel,
+            sort = "latest",
+        } = req.query;
+
+        console.log(category, sort)
+
+        const query = { };
+
+        // Search
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        // Filters
+        if (category) {
+            query.category = category;
+        }
+
+        if (emotionalTone) {
+            query.emotionalTone = emotionalTone;
+        }
+
+        if (accessLevel) {
+            query.accessLevel = accessLevel;
+        }
+
+        // Sort
+        let sortOption = {};
+
+        switch (sort) {
+            case "likes":
+                sortOption = { likesCount: -1 };
+                break;
+
+            case "views":
+                sortOption = { viewsCount: -1 };
+                break;
+
+            case "oldest":
+                sortOption = { createdAt: 1 };
+                break;
+
+            default:
+            sortOption = { createdAt: -1 };
+        }
+
+        const skip = (Number(page) - 1) * Number(limit);
+
+        const [lessons, total] = await Promise.all([
+            Lesson.find(query)
+                .sort(sortOption)
+                .skip(skip)
+                .limit(Number(limit)),
+
+            Lesson.countDocuments(query),
+        ]);
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lessons fetched successfully.",
+            payload: {
+                lessons,
+                pagination: {
+                    total,
+                    page: Number(page),
+                    limit: Number(limit),
+                    totalPages: Math.ceil(total / limit),
+                },
+            },
+        });
+    } catch (error) {
+        console.log(error.message);
+        console.log(error);
+        next(error);
+    }
+};
+
+
+
+
 const handleGetUsers = async (req, res, next) => {
     try {
         const users = await User.aggregate([
@@ -126,6 +218,31 @@ const handleGetProfileStatsAdmins = async (req, res, next) => {
                 totalLessons,
                 totalReports,
                 todayLessons
+            },
+            
+        }); 
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+const handleGetLessonsStats = async (req, res, next) => {
+    try {  
+        const totalPublicLessons = await Lesson.countDocuments({visibility: 'Public'}); 
+        const totalPrivateLessons = await Lesson.countDocuments({visibility: 'Private'}); 
+        const totalReports = await Report.countDocuments({});
+        
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Stats returned successfully",
+            payload: {
+                totalPublicLessons,
+                totalPrivateLessons,
+                totalReports
             },
             
         }); 
@@ -322,6 +439,43 @@ const handleFeaturedLessons = async (req, res, next) => {
         if(!lesson){
             throw createError(404, 'Lesson not found.');
         } 
+        
+        if(lesson?.visibility === 'Private'){
+            throw createError(404, 'Lesson was private!');
+        } 
+        const update ={isFeatured: !lesson?.isFeatured};
+        console.log(update);
+
+        const UpdatedLesson = await Lesson.findOneAndUpdate(
+            {_id: id},
+            update,
+            {returnDocument: "after"}
+        )
+        
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson growth returned successfully",
+            payload: UpdatedLesson,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+const handleReviewedLessons = async (req, res, next) => {
+    try {
+        const {id} = req.params;
+        const lesson = await Lesson.findOne({_id: id});
+
+        if(!lesson){
+            throw createError(404, 'Lesson not found.');
+        } 
+        
+        if(lesson?.visibility === 'Private'){
+            throw createError(404, 'Lesson was private!');
+        } 
         const update ={isReviewed: !lesson?.isReviewed};
         console.log(update);
 
@@ -342,7 +496,140 @@ const handleFeaturedLessons = async (req, res, next) => {
 };
 
 
+
+const handleDeleteLessons = async (req, res, next) => {
+    try {
+        const {id} = req.params;
+        const lesson = await Lesson.findByIdAndDelete({_id: id});
+        
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson growth returned successfully",
+            payload: lesson,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+const handleIgnoreLessons = async (req, res, next) => {
+    try {
+        const {id} = req.params;
+        const report = await Report.find({lessonId: id});
+        console.log(report);
+        
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Lesson returned successfully.",
+            payload: report,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+const handleGetReportsStats = async (req, res, next) => {
+    try {
+        const totalReports = await Report.countDocuments({});
+        const totalLessonsReports = await Lesson.countDocuments({reportsCount: !0});
+        const totalPending = await Lesson.countDocuments({isReviewed: false});
+        
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Stats returned successfully",
+            payload: {
+                totalLessonsReports,
+                totalPending,
+                totalReports
+            },
+            
+        }); 
+
+    } catch (error) {
+        console.log(error?.message);
+        next(error);
+    }
+};
+
+
+
+const handleGetReportsLessons = async (req, res, next) => {
+    try {
+        const totalReports = await Report.countDocuments({});
+        const totalLessonsReports = await Lesson.countDocuments({reportsCount: !0});
+        const totalPending = await Lesson.countDocuments({isReviewed: false});
+        const result = await Report.aggregate([
+            {
+                $group: {
+                    _id: "$lessonId",
+                    reportCount: { $sum: 1 },
+                    reports: {
+                        $push: {
+                            _id: '$_id',
+                            reporterEmail: "$reporterEmail",
+                            reporterUserId: "$reporterUserId",
+                            reason: "$reason",
+                            timestamp: "$timestamp",
+                        },
+                    },
+                },
+            },
+
+            {
+                $lookup: {
+                    from: "lessons",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "lesson",
+                },
+            },
+
+            {
+                $unwind: "$lesson",
+            },
+
+            {
+                $project: {
+                    _id: 1,
+                    reportCount: 1,
+                    reports: 1,
+
+                    lessonTitle: "$lesson.title",
+                    lessonCreator: "$lesson.creatorName",
+                    lessonVisibility: "$lesson.visibility",
+                },
+            },
+
+            {
+                $sort: {
+                    reportCount: -1,
+                },
+            },
+        ]);
+        
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Stats returned successfully",
+            payload: result,
+            
+        }); 
+
+    } catch (error) {
+        console.log(error?.message);
+        next(error);
+    }
+};
+
+
+
 module.exports = {
+    handleGetAllLessonsAdmin,
     handleGetUsers,
     handleCreateAdmin,
     handleGetAdminsStats,
@@ -353,4 +640,10 @@ module.exports = {
 
 
     handleFeaturedLessons,
+    handleReviewedLessons,
+    handleDeleteLessons,
+    handleGetLessonsStats,
+    handleGetReportsStats,
+    handleGetReportsLessons,
+    handleIgnoreLessons
  }
