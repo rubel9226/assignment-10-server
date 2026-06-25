@@ -80,7 +80,7 @@ const handleGetAllLessons = async (req, res, next) => {
             sort = "latest",
         } = req.query;
 
-        const query = {};
+        const query = {'visibility' : 'Public'};
 
         // Search
         if (search) {

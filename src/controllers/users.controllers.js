@@ -62,7 +62,7 @@ const handleGetFavoritesLessons = async (req, res, next) => {
 
         const favorites = await Lesson.find({
             favorites: user.id.toString(),
-        }); 
+        }).sort({ createdAt: -1 }) ;
 
 
         return successResponse(res, {
@@ -71,6 +71,43 @@ const handleGetFavoritesLessons = async (req, res, next) => {
             payload: favorites,
         }); 
     } catch (error) {
+        next(error);
+    }
+};
+
+
+
+const handleRemoveFavorite = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const {id} = req.params;
+        // console.log({user, id});
+
+        if (!user) {
+            throw createError(404, 'User not found.');
+        };
+        
+        const lesson = await Lesson.findOne({_id: id});
+        if (!lesson) {
+            throw createError(404, "Lesson not found");
+        }
+        if(!lesson.favorites.includes(user?.id)){
+          throw createError(403, "Unauthorize!")  
+        }
+        lesson.favorites = lesson.favorites.filter(
+            (id) => id.toString() !== user.id.toString()
+        );
+        lesson.favoritesCount = Math.max(0, lesson.favoritesCount - 1);
+
+        lesson.save();
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Favorites returned successfully.",
+            payload: lesson
+        }); 
+    } catch (error) {
+        console.log(error?.message)
         next(error);
     }
 };
@@ -107,5 +144,6 @@ const handleGetMyPublicLessons = async (req, res, next) => {
 module.exports = {
   handleGetProfileStats,
   handleGetFavoritesLessons, 
+  handleRemoveFavorite,
   handleGetMyPublicLessons
 };

@@ -33,6 +33,9 @@ app.use('/api/reports', reportRouter);
 const userRouter = require('./routes/user.routes');
 app.use('/api/users', userRouter);
 
+const adminRouter = require('./routes/admin.routes');
+app.use('/api/admins', adminRouter);
+
 
 app.use((req, res, next) => {
     next(createError(404, 'route not found'));

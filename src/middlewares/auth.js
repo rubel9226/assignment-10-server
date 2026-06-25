@@ -24,14 +24,16 @@ const isLoggedIn = async (req, res, next) => {
         req.user = payload;
         next();
     } catch (error) {
+        console.log(error?.message)
         next(error)
     }
 }; 
 
 const isAdmin = async (req, res, next) => {
     try {
-        if(req.user.isAdmin == false){
-            throw createError(403, 'Forbidden. You must be an admin to access this resource');
+        // console.log(req?.user?.isAdmin);
+        if(req?.user?.isAdmin !== true){
+            throw createError(403, "User can't access.");
         }
         next();
     } catch (error) {
