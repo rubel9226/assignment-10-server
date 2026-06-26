@@ -8,7 +8,6 @@ const paymentRouter = express.Router();
 paymentRouter.post(
     '/payments-update',
     express.raw({ type: "application/json"}),
-    isLoggedIn,
     handlePaymentSection
 );
  
