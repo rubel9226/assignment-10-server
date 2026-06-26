@@ -1,13 +1,17 @@
 const createError = require("http-errors");
 const { ObjectId } = require("mongodb");
+
 const Lesson = require("../models/lesson.modal");
 const { successResponse } = require("./response.controllers");
+const User = require("../models/users.modal");
 
 
 
 const handleGetProfileStats = async (req, res, next) => {
     try {
-        const user = req.user;
+        const user = req?.user;
+        const id = user?.id;
+        console.log(id);
 
         if (!user) {
             throw createError(404, 'User not found.');
@@ -24,14 +28,18 @@ const handleGetProfileStats = async (req, res, next) => {
         }); 
 
 
-        const totalLikes = await Lesson.countDocuments({
-            likes: user.id.toString(),
-        });
+        
 
+        const totalLesson = await Lesson.find({creatorId: id});
+        const totalLikes = totalLesson.reduce(
+            (sum, lesson) => sum + lesson?.likesCount,
+            0
+        );
 
-        const totalFavorites = await Lesson.countDocuments({
-            favorites: user.id.toString(),
-        }); 
+        const totalFavorites = totalLesson.reduce(
+            (sum, lesson) => sum + lesson?.favoritesCount,
+            0
+        ); 
 
 
         return successResponse(res, {
@@ -42,6 +50,7 @@ const handleGetProfileStats = async (req, res, next) => {
                 publicLessons,
                 totalFavorites,
                 totalLikes, 
+                totalLesson
             },
         }); 
     } catch (error) {
@@ -134,7 +143,8 @@ const handleGetMyPublicLessons = async (req, res, next) => {
     } catch (error) { 
       next(error);
     }
-};
+}; 
+
 
 
 
@@ -145,5 +155,5 @@ module.exports = {
   handleGetProfileStats,
   handleGetFavoritesLessons, 
   handleRemoveFavorite,
-  handleGetMyPublicLessons
+  handleGetMyPublicLessons, 
 };

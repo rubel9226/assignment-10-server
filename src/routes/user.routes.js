@@ -13,6 +13,21 @@ userRouter.get(
     handleGetProfileStats
 );
 
+
+// post api/users
+userRouter.get(
+    '/my-public-lessons', 
+    isLoggedIn, 
+    handleGetMyPublicLessons
+);
+
+
+// post api/users
+userRouter.get(
+    '/profile-stats', 
+    isLoggedIn, 
+    handleGetProfileStats
+); 
  
 
 

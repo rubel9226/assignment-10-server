@@ -14,6 +14,13 @@ app.use(cors({
     credentials: true
 }));
 
+
+
+
+const paymentRouter = require('./routes/payment.route');
+app.use('/api/payments', paymentRouter);
+
+
 app.use(cookieParser());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
@@ -37,11 +44,13 @@ const adminRouter = require('./routes/admin.routes');
 app.use('/api/admins', adminRouter);
 
 
+
 app.use((req, res, next) => {
     next(createError(404, 'route not found'));
 });
 
 app.use((err, req, res, next) => {
+    console.log(err?.message)
     return errorResponse(res, {
         statusCode: err.status,
         message: err.message
