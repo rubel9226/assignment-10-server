@@ -518,7 +518,6 @@ const handleIgnoreLessons = async (req, res, next) => {
     try {
         const {id} = req.params;
         const report = await Report.find({lessonId: id});
-        console.log(report);
         
         return successResponse(res, {
             statusCode: 200,

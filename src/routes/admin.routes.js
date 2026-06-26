@@ -120,8 +120,8 @@ adminRouter.patch(
 // post api/admins
 adminRouter.patch(
     '/ignore-lesson/:id',
-    // isLoggedIn,
-    // isAdmin,
+    isLoggedIn,
+    isAdmin,
     handleIgnoreLessons
 );
 
