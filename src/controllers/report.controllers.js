@@ -11,16 +11,29 @@ const handleCreateReport = async (req, res, next) => {
             lessonTitle, 
             reason,
 
-            userId,
-            userName,
+            reporterUserId,
+            reporterName,
             userEmail,
 
             reportedUserEmail
         } = req.body;
 
+        console.log({
+            lessonId,
+            lessonTitle, 
+            reason,
+
+            reporterUserId,
+            reporterName,
+            reporterEmail,
+
+            reportedUserEmail
+        });
+        console.log(req?.body, 'reporter body');
+
         const alreadyReported = await Report.findOne({
             lessonId,
-            reporterUserId: userId,
+            reporterUserId: reporterUserId,
         });
         
         if (alreadyReported) { 
@@ -31,9 +44,9 @@ const handleCreateReport = async (req, res, next) => {
             lessonId: lessonId,
             lessonTitle: lessonTitle,
 
-            reporterUserId: userId,
-            reporterName: userName,
-            reporterEmail: userEmail,
+            reporterUserId: reporterUserId,
+            reporterName: reporterName,
+            reporterEmail: reporterEmail,
 
             reportedUserEmail: reportedUserEmail, 
             reason: reason,
