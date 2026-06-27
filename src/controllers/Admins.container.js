@@ -125,6 +125,11 @@ const handleGetUsers = async (req, res, next) => {
                     lessons: 0,
                 },
             },
+            {
+                $sort: {
+                    createdAt: -1
+                }
+            }
         ]);
 
 

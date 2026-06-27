@@ -83,7 +83,7 @@ const handleGetAllLessons = async (req, res, next) => {
 
         const query = {'visibility' : 'Public'};
 
-        // Search
+        
         if (search) {
             query.$or = [
                 { title: { $regex: search, $options: "i" } },
