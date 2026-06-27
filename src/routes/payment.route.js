@@ -7,7 +7,7 @@ const paymentRouter = express.Router();
 // post api/users
 paymentRouter.post(
     '/payments-update',
-    express.raw({ type: "application/json"}),
+    express.raw({ type: "application/json" }),
     handlePaymentSection
 );
  

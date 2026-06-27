@@ -120,6 +120,10 @@ const handleGetAllLessons = async (req, res, next) => {
                 sortOption = { createdAt: 1 };
                 break;
 
+            case "comments":
+                sortOption = { commentsCount: -1 };
+                break;
+
             default:
             sortOption = { createdAt: -1 };
         }

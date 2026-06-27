@@ -42,22 +42,26 @@ const handleGetAllLessonsAdmin = async (req, res, next) => {
 
         if (accessLevel) {
             query.accessLevel = accessLevel;
-        }
+        } 
 
         // Sort
         let sortOption = {};
 
         switch (sort) {
-            case "likes":
-                sortOption = { likesCount: -1 };
+            case "Reviewed":
+                query.isReviewed = true;
                 break;
 
-            case "views":
-                sortOption = { viewsCount: -1 };
+            case "Featured":
+                query.isFeatured = true;
                 break;
 
-            case "oldest":
-                sortOption = { createdAt: 1 };
+            case "Public":
+                query.visibility = 'Public';
+                break;
+
+            case "Private":
+                query.visibility = 'Private';
                 break;
 
             default:

@@ -4,6 +4,7 @@ const { ObjectId } = require("mongodb");
 const Lesson = require("../models/lesson.modal");
 const { successResponse } = require("./response.controllers");
 const User = require("../models/users.modal");
+const { default: mongoose } = require("mongoose");
 
 
 
@@ -143,7 +144,77 @@ const handleGetMyPublicLessons = async (req, res, next) => {
     } catch (error) { 
       next(error);
     }
-}; 
+};
+
+
+
+
+
+
+const handleGetWeeklyCart = async (req, res, next) => {
+    try {
+        const user = req?.user; 
+        const weeklyStats = await Lesson.aggregate([
+            {
+                $match: {
+                    creatorId: new mongoose.Types.ObjectId(req.user.id),
+                    createdAt: {
+                        $gte: new Date(
+                            new Date().setDate(new Date().getDate() - 6)
+                        ),
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        $dayOfWeek: "$createdAt",
+                    },
+                    lessons: {
+                        $sum: 1,
+                    },
+                },
+            },
+        ]);
+
+        const weekMap = {
+            1: "Sun",
+            2: "Mon",
+            3: "Tue",
+            4: "Wed",
+            5: "Thu",
+            6: "Fri",
+            7: "Sat",
+        };
+
+        const data = [
+            { day: "Mon", lessons: 0 },
+            { day: "Tue", lessons: 0 },
+            { day: "Wed", lessons: 0 },
+            { day: "Thu", lessons: 0 },
+            { day: "Fri", lessons: 0 },
+            { day: "Sat", lessons: 0 },
+            { day: "Sun", lessons: 0 },
+        ];
+
+        weeklyStats.forEach((item) => {
+            const day = weekMap[item._id];
+            const index = data.findIndex((d) => d.day === day);
+
+            if (index !== -1) {
+                data[index].lessons = item.lessons;
+            }
+        });
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "Weekly chart data returned successfully",
+            payload: data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 
 
@@ -156,4 +227,5 @@ module.exports = {
   handleGetFavoritesLessons, 
   handleRemoveFavorite,
   handleGetMyPublicLessons, 
+  handleGetWeeklyCart,
 };

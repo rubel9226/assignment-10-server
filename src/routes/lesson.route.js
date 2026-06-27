@@ -16,7 +16,7 @@ lessonRouter.post(
 // post api/lessons/
 lessonRouter.get(
     '/all-lessons', 
-    isLoggedIn,
+    // isLoggedIn,
     handleGetAllLessons
 );
 
